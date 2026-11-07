@@ -1,0 +1,524 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EmpireSwitch Secure Checkout</title>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg-color: #0b0f19;
+        --card-bg: #111827;
+        --border: #1f2937;
+        --accent: #38bdf8;
+        --accent-green: #10b981;
+        --text-main: #f9fafb;
+        --text-muted: #9ca3af;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        background: rgba(11, 15, 25, 0.95);
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+        color: var(--text-main);
+      }
+
+      .checkout-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        width: 100%;
+        max-width: 480px;
+        box-shadow:
+          0 20px 25px -5px rgba(0, 0, 0, 0.5),
+          0 8px 10px -6px rgba(0, 0, 0, 0.5);
+        overflow: hidden;
+      }
+
+      .checkout-header {
+        padding: 24px;
+        background: #0f172a;
+        border-bottom: 1px solid var(--border);
+        text-align: center;
+        position: relative;
+      }
+
+      .merchant-brand {
+        font-size: 14px;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 6px;
+      }
+
+      .pay-amount {
+        font-size: 32px;
+        font-weight: 800;
+        color: var(--accent);
+      }
+
+      .pay-email {
+        font-size: 13px;
+        color: var(--text-muted);
+        margin-top: 4px;
+      }
+
+      /* Tabs */
+      .channel-tabs {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        background: #07090e;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .tab-btn {
+        padding: 14px 8px;
+        background: none;
+        border: none;
+        color: var(--text-muted);
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.2s ease;
+        border-bottom: 2px solid transparent;
+      }
+
+      .tab-btn.active {
+        color: var(--accent);
+        border-bottom-color: var(--accent);
+        background: rgba(56, 189, 248, 0.05);
+      }
+
+      .tab-content {
+        padding: 24px;
+        display: none;
+      }
+      .tab-content.active {
+        display: block;
+      }
+
+      /* Card Form */
+      .form-group {
+        margin-bottom: 16px;
+      }
+      .form-label {
+        display: block;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text-muted);
+        margin-bottom: 6px;
+        text-transform: uppercase;
+      }
+      .form-input {
+        width: 100%;
+        padding: 12px 14px;
+        background: #07090e;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        color: var(--text-main);
+        font-size: 15px;
+        outline: none;
+      }
+      .form-input:focus {
+        border-color: var(--accent);
+      }
+
+      .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+
+      .btn-pay {
+        width: 100%;
+        padding: 14px;
+        background: var(--accent);
+        color: #0b0f19;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: opacity 0.2s;
+      }
+      .btn-pay:hover {
+        opacity: 0.9;
+      }
+
+      /* Transfer Details Box */
+      .transfer-box {
+        background: #07090e;
+        border: 1px dashed #334155;
+        border-radius: 12px;
+        padding: 20px;
+        text-align: center;
+        margin-bottom: 20px;
+      }
+
+      .bank-name {
+        font-size: 13px;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        margin-bottom: 4px;
+      }
+      .account-number {
+        font-size: 28px;
+        font-weight: 800;
+        color: var(--accent-green);
+        letter-spacing: 2px;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+      }
+
+      .btn-copy {
+        background: #1e293b;
+        color: var(--accent);
+        border: none;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      .transfer-timer {
+        font-size: 12px;
+        color: #f59e0b;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        margin-top: 10px;
+      }
+
+      .pulse-dot {
+        width: 8px;
+        height: 8px;
+        background: var(--accent-green);
+        border-radius: 50%;
+        animation: pulse 1.5s infinite;
+      }
+      @keyframes pulse {
+        0% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.3;
+        }
+        100% {
+          opacity: 1;
+        }
+      }
+
+      /* USSD Details */
+      .ussd-box {
+        background: #07090e;
+        border-radius: 12px;
+        padding: 20px;
+        text-align: center;
+      }
+      .ussd-code {
+        font-size: 26px;
+        font-weight: 800;
+        color: var(--accent);
+        letter-spacing: 1px;
+        margin: 12px 0;
+      }
+
+      /* Success Overlay */
+      .success-overlay {
+        display: none;
+        text-align: center;
+        padding: 40px 24px;
+      }
+      .success-icon {
+        font-size: 64px;
+        color: var(--accent-green);
+        margin-bottom: 16px;
+      }
+
+      .footer-secure {
+        padding: 16px;
+        text-align: center;
+        font-size: 11px;
+        color: var(--text-muted);
+        border-top: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="checkout-card">
+      <div class="checkout-header">
+        <div class="merchant-brand" id="merchantTitle">
+          EmpireCodes Technologies
+        </div>
+        <div class="pay-amount" id="displayAmount">₦100.00</div>
+        <div class="pay-email" id="displayEmail">customer@example.com</div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="channel-tabs" id="channelTabs">
+        <button class="tab-btn active" onclick="switchTab('card')">
+          <i class="fas fa-credit-card"></i> Card
+        </button>
+        <button class="tab-btn" onclick="switchTab('transfer')">
+          <i class="fas fa-university"></i> Transfer
+        </button>
+        <button class="tab-btn" onclick="switchTab('ussd')">
+          <i class="fas fa-mobile-alt"></i> USSD
+        </button>
+      </div>
+
+      <!-- 1. Card Tab -->
+      <div class="tab-content active" id="tab-card">
+        <div class="form-group">
+          <label class="form-label">Card Number</label>
+          <input
+            type="text"
+            class="form-input"
+            id="cardNumber"
+            placeholder="0000 0000 0000 0000"
+            maxlength="19"
+          />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Expires</label>
+            <input
+              type="text"
+              class="form-input"
+              id="cardExpiry"
+              placeholder="MM / YY"
+              maxlength="5"
+            />
+          </div>
+          <div class="form-group">
+            <label class="form-label">CVV</label>
+            <input
+              type="password"
+              class="form-input"
+              id="cardCvv"
+              placeholder="123"
+              maxlength="3"
+            />
+          </div>
+        </div>
+        <button class="btn-pay" onclick="payWithCard()">
+          <i class="fas fa-lock"></i> Pay
+          <span id="btnCardAmount">₦100.00</span>
+        </button>
+      </div>
+
+      <!-- 2. Transfer Tab -->
+      <div class="tab-content" id="tab-transfer">
+        <div class="transfer-box">
+          <div class="bank-name" id="virtualBank">Wema Bank / Providus</div>
+          <div class="account-number">
+            <span id="virtualAccount">9928340192</span>
+            <button class="btn-copy" onclick="copyAccount()">
+              <i class="fas fa-copy"></i> Copy
+            </button>
+          </div>
+          <p style="font-size: 13px; color: var(--text-muted)">
+            Transfer exactly
+            <b id="transferExactAmount" style="color: var(--text-main)"
+              >₦100.00</b
+            >
+            to the account above via your bank app.
+          </p>
+          <div class="transfer-timer">
+            <div class="pulse-dot"></div>
+            Awaiting transfer confirmation (Expires in 29:54)
+          </div>
+        </div>
+        <button
+          class="btn-pay"
+          style="background: #1e293b; color: var(--text-main)"
+          onclick="checkTransferStatus()"
+        >
+          <i class="fas fa-sync-alt"></i> I have sent the money
+        </button>
+      </div>
+
+      <!-- 3. USSD Tab -->
+      <div class="tab-content" id="tab-ussd">
+        <div class="ussd-box">
+          <div style="font-size: 13px; color: var(--text-muted)">
+            Dial this code on your mobile phone:
+          </div>
+          <div class="ussd-code" id="ussdCodeDisplay">*737*000*8429#</div>
+          <p
+            style="
+              font-size: 12px;
+              color: var(--text-muted);
+              margin-bottom: 16px;
+            "
+          >
+            Authenticate with your mobile banking PIN to complete payment.
+          </p>
+          <button class="btn-pay" onclick="checkTransferStatus()">
+            <i class="fas fa-check-circle"></i> Confirm USSD Payment
+          </button>
+        </div>
+      </div>
+
+      <!-- Success Screen -->
+      <div class="success-overlay" id="successScreen">
+        <div class="success-icon"><i class="fas fa-check-circle"></i></div>
+        <h2 style="font-size: 22px; margin-bottom: 8px">Payment Successful!</h2>
+        <p
+          style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px"
+          id="successRef"
+        >
+          Ref: EMP-SW-20261106-XXXXXXXX
+        </p>
+        <button class="btn-pay" onclick="window.close()">Done</button>
+      </div>
+
+      <div class="footer-secure">
+        <i class="fas fa-shield-alt" style="color: var(--accent-green)"></i>
+        Secured by EmpireSwitch High-Availability Payment Router
+      </div>
+    </div>
+
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      const amount = parseFloat(params.get("amount") || 100);
+      const email = params.get("email") || "client@empirecodes.com.ng";
+      const ref =
+        params.get("ref") || `EMP-SW-${Date.now().toString(16).toUpperCase()}`;
+
+      document.getElementById("displayAmount").innerText =
+        `₦${amount.toLocaleString()}`;
+      document.getElementById("btnCardAmount").innerText =
+        `₦${amount.toLocaleString()}`;
+      document.getElementById("transferExactAmount").innerText =
+        `₦${amount.toLocaleString()}`;
+      document.getElementById("displayEmail").innerText = email;
+
+      // Load Dynamic Virtual Account on init
+      async function initCheckout() {
+        try {
+          const res = await fetch("/api/v1/charge", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              amount: amount,
+              currency: "NGN",
+              customer_email: email,
+              reference: ref,
+              channel: "auto",
+            }),
+          });
+          const data = await res.json();
+          if (data.virtual_account_number) {
+            document.getElementById("virtualAccount").innerText =
+              data.virtual_account_number;
+            document.getElementById("virtualBank").innerText =
+              data.virtual_bank_name || "Wema / Providus Bank";
+          }
+          if (data.ussd_code) {
+            document.getElementById("ussdCodeDisplay").innerText =
+              data.ussd_code;
+          }
+          if (data.authorization_url) {
+            window.authUrl = data.authorization_url;
+          }
+        } catch (e) {
+          console.error("Init checkout error:", e);
+        }
+      }
+      initCheckout();
+
+      function switchTab(tab) {
+        document
+          .querySelectorAll(".tab-btn")
+          .forEach((b) => b.classList.remove("active"));
+        document
+          .querySelectorAll(".tab-content")
+          .forEach((c) => c.classList.remove("active"));
+
+        event.currentTarget.classList.add("active");
+        document.getElementById(`tab-${tab}`).classList.add("active");
+      }
+
+      function copyAccount() {
+        const acc = document.getElementById("virtualAccount").innerText;
+        navigator.clipboard.writeText(acc);
+        alert("Account Number Copied: " + acc);
+      }
+
+      function payWithCard() {
+        if (window.authUrl) {
+          window.location.href = window.authUrl;
+        } else {
+          alert("Routing to secure gateway...");
+        }
+      }
+
+      async function checkTransferStatus() {
+        try {
+          const res = await fetch(`/api/v1/verify/${ref}`);
+          const data = await res.json();
+          if (data.status === "success") {
+            showSuccess();
+          } else {
+            alert(
+              "Payment is still processing. Please allow a few seconds for NIBSS settlement.",
+            );
+          }
+        } catch (e) {
+          alert("Payment check in progress...");
+        }
+      }
+
+      function showSuccess() {
+        document.getElementById("channelTabs").style.display = "none";
+        document
+          .querySelectorAll(".tab-content")
+          .forEach((c) => (c.style.display = "none"));
+        document.getElementById("successScreen").style.display = "block";
+        document.getElementById("successRef").innerText = `Ref: ${ref}`;
+      }
+
+      // Auto-poll verification every 4 seconds
+      setInterval(async () => {
+        try {
+          const res = await fetch(`/api/v1/verify/${ref}`);
+          const data = await res.json();
+          if (data.status === "success") {
+            showSuccess();
+          }
+        } catch (e) {}
+      }, 4000);
+    </script>
+  </body>
+</html>

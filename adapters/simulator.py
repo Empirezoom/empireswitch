@@ -55,3 +55,4 @@ class InterswitchSimulatorAdapter(BaseGatewayAdapter):
 
     def verify_webhook_signature(self, payload_bytes: bytes, signature_header: str) -> bool:
         return True
+

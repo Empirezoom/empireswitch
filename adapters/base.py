@@ -38,3 +38,4 @@ class BaseGatewayAdapter(ABC):
         Cryptographically verifies incoming webhook payload HMAC signature.
         """
         pass
+
